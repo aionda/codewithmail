@@ -1,5 +1,5 @@
 from flask import Flask, request
-import sys, subprocess, sendgrid
+import sys, subprocess, sendgrid, os
 
 app = Flask(__name__)
 
@@ -11,9 +11,10 @@ def execute():
     program = request.form['text']
 
     #put the email message in a file
-    f = open(file_name, "r+")    
+    f = open(file_name, "w")    
     #return "file_name: "+file_name+"\nhtml: "+program
-    f.write(program);
+    f.write(program)
+    f.close()
 
     #execute the file and redirect STDERROR and STDOUT to a file    
     cmd = ["python", file_name]
@@ -32,6 +33,7 @@ def reply(output, to_email, from_email, file_name, program):
     message.set_text(output)
 
     sg.send(message)
+    os.remove(file_name)
 
 if __name__ == "__main__":
     app.run(
