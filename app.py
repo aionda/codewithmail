@@ -9,11 +9,10 @@ def execute():
     from_email = request.form['from']
     file_name = request.form['subject'] 
     file_name_unique = file_name + from_email + str(int(time.time()))
-    program = request.form['text']
+    program = request.form['text'].replace(u'\xa0', u' ')
 
     #put the email message in a file
     f = open(file_name_unique, "w")    
-    #return "file_name: "+file_name+"\nhtml: "+program
     f.write(program)
     f.close()
 
