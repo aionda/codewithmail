@@ -1,5 +1,5 @@
 from flask import Flask, request
-import sys, subprocess, sendgrid, os
+import sys, subprocess, sendgrid, os, time
 
 app = Flask(__name__)
 
@@ -8,21 +8,21 @@ def execute():
     to_email = request.form['to']
     from_email = request.form['from']
     file_name = request.form['subject']
+    file_name_unique = file_name + from_email + str(int(time.time()))
     program = request.form['text'].replace(u'\xa0', u' ')
 
     #put the email message in a file
-    f = open(file_name, "w")    
-    #return "file_name: "+file_name+"\nhtml: "+program
+    f = open(file_name_unique, "w")    
     f.write(program)
     f.close()
 
     #execute the file and redirect STDERROR and STDOUT to a file    
-    cmd = ["python", file_name]
+    cmd = ["python", file_name_unique]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
-    reply(p.stdout.read(), to_email, from_email, file_name, program)   
+    reply(p.stdout.read(), to_email, from_email, file_name, program, file_name_unique)   
     return ('', 204)
 
-def reply(output, to_email, from_email, file_name, program):
+def reply(output, to_email, from_email, file_name, program, file_name_unique):
     #put the output file in the reply message
     sg = sendgrid.SendGridClient("compilerapp", "mycompiler1")
     message = sendgrid.Mail()
@@ -33,7 +33,7 @@ def reply(output, to_email, from_email, file_name, program):
     message.set_text(output)
 
     sg.send(message)
-    os.remove(file_name)
+    os.remove(file_name_unique)
 
 if __name__ == "__main__":
     app.run(
