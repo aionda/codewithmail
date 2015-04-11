@@ -8,7 +8,7 @@ def execute():
     to_email = request.form['to']
     from_email = request.form['from']
     file_name = request.form['subject']
-    program = request.form['text']
+    program = request.form['text'].replace(u'\xa0', u' ')
 
     #put the email message in a file
     f = open(file_name, "w")    
