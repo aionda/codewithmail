@@ -1,5 +1,5 @@
 from flask import Flask, request
-import sys, subprocess, sendgrid, os, time
+import sys, subprocess, sendgrid, os, time, threading
 
 app = Flask(__name__)
 
@@ -17,9 +17,17 @@ def execute():
     f.close()
 
     #execute the file and redirect STDERROR and STDOUT to a file    
-    cmd = ["python", file_name_unique]
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
-    reply(p.stdout.read(), to_email, from_email, file_name, program, file_name_unique)   
+    #cmd = ["python", file_name_unique]
+    start_time = time.time();
+    command = Command("python " + file_name_unique)
+    result = command.run(timeout = 5)
+    #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
+    #reply(p.stdout.read(), to_email, from_email, file_name, program, file_name_unique)   
+    if(result != 0):
+        print "infinite loop"
+    else:
+        print "good result"
+
     return ('', 204)
 
 def reply(output, to_email, from_email, file_name, program, file_name_unique):
@@ -34,6 +42,26 @@ def reply(output, to_email, from_email, file_name, program, file_name_unique):
 
     sg.send(message)
     os.remove(file_name_unique)
+
+class Command(object):
+    def __init__ (self, cmd):
+        self.cmd = cmd
+        self.process = None
+
+    def run(self, timeout):
+        def target():
+            self.process = subprocess.Popen(self.cmd, shell = True)
+            self.process.communicate()
+
+        thread = threading.Thread(target=target)
+        thread.start()
+
+        thread.join(timeout)
+
+        if thread.is_alive():
+            self.process.terminate()
+            thread.join()
+        return self.process.returncode
 
 if __name__ == "__main__":
     app.run(
