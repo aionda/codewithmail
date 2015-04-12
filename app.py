@@ -34,6 +34,7 @@ def execute():
 
 def reply(output, to_email, from_email, file_name, program, file_name_unique):
     #put the output file in the reply message
+    print output
     sg = sendgrid.SendGridClient("compilerapp", "mycompiler1")
     message = sendgrid.Mail()
 
