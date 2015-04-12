@@ -17,16 +17,18 @@ def execute():
     f.close()
 
     #execute the file and redirect STDERROR and STDOUT to a file    
-    #cmd = ["python", file_name_unique]
+    cmd = ["python", file_name_unique]
     start_time = time.time();
-    command = Command("python " + file_name_unique)
-    result = command.run(timeout = 5)
-    #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
-    #reply(p.stdout.read(), to_email, from_email, file_name, program, file_name_unique)   
+    #command = Command("python " + file_name_unique)
+    #result = command.run(timeout = 5)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) 
+    reply(p.stdout.read(), to_email, from_email, file_name, program, file_name_unique)   
+    '''
     if(result != 0):
         print "infinite loop"
     else:
         print "good result"
+    '''
 
     return ('', 204)
 
